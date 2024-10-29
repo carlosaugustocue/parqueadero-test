@@ -16,12 +16,20 @@ public class VehiculoController {
 
     @PostMapping
     public Vehiculo registrarVehiculo(@RequestBody Vehiculo vehiculo) {
+        System.out.println("Esto es una prueba");
         return gestor.registrarEntrada(vehiculo);
     }
 
     @PutMapping("/salida/{placa}")
     public double registrarSalida(@PathVariable String placa) {
+        System.out.println("Actualizando el vehiculo de placa: "+ placa);
         return gestor.registrarSalida(placa);
+    }
+
+    @GetMapping("/entrada/{placa}")
+    public String mostrar(@PathVariable String placa) {
+        System.out.println("Actualizando el vehiculo de placa: "+ placa);
+        return "Hola";
     }
 }
 
