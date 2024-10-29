@@ -4,6 +4,9 @@ import com.parqueadero.sistema_parqueadero.modelo.Vehiculo;
 import com.parqueadero.sistema_parqueadero.servicio.GestorParqueadero;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/vehiculos")
 public class VehiculoController {
@@ -26,10 +29,22 @@ public class VehiculoController {
         return gestor.registrarSalida(placa);
     }
 
-    @GetMapping("/entrada/{placa}")
+    /*@GetMapping("/entrada/{placa}")
     public String mostrar(@PathVariable String placa) {
         System.out.println("Actualizando el vehiculo de placa: "+ placa);
-        return "Hola";
+        return placa;
+    }*/
+    @GetMapping("/entrada/{placa}")
+    public Map<String, String> mostrar(@PathVariable String placa) {
+        System.out.println("Mostrando el vehículo con placa: " + placa);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("placa", placa);
+        response.put("mensaje", "Vehículo encontrado");
+        response.put("fechaEntrada", "2021-10-10 10:00:00");
+
+        return response;
     }
+
 }
 
