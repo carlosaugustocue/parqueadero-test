@@ -24,14 +24,21 @@ public class GestorParqueadero {
     public Vehiculo registrarEntrada(Vehiculo vehiculo) {
         // Buscar un espacio libre
         EspacioParqueadero espacioLibre = espacioRepo.findByOcupado(false).stream().findFirst().orElse(null);
+
         if (espacioLibre != null) {
+            // Asignar el espacio y registrar la hora de ingreso
             espacioLibre.asignarEspacio();
             espacioRepo.save(espacioLibre);
             vehiculo.setHoraIngreso(LocalDateTime.now());
+
+            // Guardar y devolver el vehículo registrado
             return vehiculoRepo.save(vehiculo);
+        } else {
+            System.out.println("No hay espacios libres en el parqueadero.");
+            return null;  // No hay espacios disponibles
         }
-        return null;  // No hay espacios libres
     }
+
 
     public double registrarSalida(String placa) {
         Optional<Vehiculo> optionalVehiculo = vehiculoRepo.findByPlaca(placa);

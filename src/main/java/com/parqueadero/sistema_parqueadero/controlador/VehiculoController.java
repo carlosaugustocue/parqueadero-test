@@ -17,11 +17,11 @@ public class VehiculoController {
         this.gestor = gestor;
     }
 
-    @PostMapping
+    /*@PostMapping
     public Vehiculo registrarVehiculo(@RequestBody Vehiculo vehiculo) {
         System.out.println("Esto es una prueba");
         return gestor.registrarEntrada(vehiculo);
-    }
+    }*/
 
     @PutMapping("/salida/{placa}")
     public double registrarSalida(@PathVariable String placa) {
@@ -45,6 +45,32 @@ public class VehiculoController {
 
         return response;
     }
+
+    @PostMapping("/entrada")
+    public Map<String, Object> registrarVehiculo(@RequestBody Vehiculo vehiculo) {
+        System.out.println("Registrando el vehículo con placa: " + vehiculo.getPlaca());
+
+        Vehiculo vehiculoRegistrado = gestor.registrarEntrada(vehiculo);
+
+        // Verificar si el vehículo fue registrado correctamente o no había espacios disponibles
+        if (vehiculoRegistrado == null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("mensaje", "No hay espacios disponibles en el parqueadero.");
+            return response;
+        }
+
+        // Preparar la respuesta de éxito
+        Map<String, Object> response = new HashMap<>();
+        response.put("placa", vehiculoRegistrado.getPlaca());
+        response.put("mensaje", "Vehículo registrado exitosamente");
+        response.put("fechaEntrada", vehiculoRegistrado.getHoraIngreso());
+
+        return response;
+    }
+
+
+
+
 
 }
 
