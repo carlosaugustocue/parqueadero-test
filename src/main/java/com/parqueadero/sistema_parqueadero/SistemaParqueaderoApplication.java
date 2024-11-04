@@ -1,13 +1,12 @@
 package com.parqueadero.sistema_parqueadero;
 
-
-
 import com.parqueadero.sistema_parqueadero.modelo.Tarifa;
 import com.parqueadero.sistema_parqueadero.repositorio.TarifaRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate; // Asegúrate de importar RestTemplate
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -32,7 +31,13 @@ public class SistemaParqueaderoApplication {
 		};
 	}
 
-	// 2. Cargar datos iniciales al arrancar la aplicación (Tarifas)
+	// 2. Definición del Bean RestTemplate
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
+
+	// 3. Cargar datos iniciales al arrancar la aplicación (Tarifas)
 	@Bean
 	CommandLineRunner initDatabase(TarifaRepository tarifaRepository) {
 		return args -> {
@@ -47,4 +52,3 @@ public class SistemaParqueaderoApplication {
 		};
 	}
 }
-

@@ -13,9 +13,10 @@ async function capturarPlaca() {
 
         const data = await response.json();
 
-        // Mostrar la placa capturada y ocultar el mensaje de procesamiento
+        // Mostrar la placa capturada en mayúsculas y ocultar el mensaje de procesamiento
         if (data.placa) {
-            textoPlaca.innerText = data.placa;
+            console.log(data.placa);
+            textoPlaca.innerText = data.placa.toUpperCase();
         } else {
             textoPlaca.innerText = "No se detectó";
         }

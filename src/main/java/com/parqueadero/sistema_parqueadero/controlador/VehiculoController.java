@@ -2,6 +2,7 @@ package com.parqueadero.sistema_parqueadero.controlador;
 
 import com.parqueadero.sistema_parqueadero.modelo.Vehiculo;
 import com.parqueadero.sistema_parqueadero.servicio.GestorParqueadero;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -13,64 +14,45 @@ public class VehiculoController {
 
     private final GestorParqueadero gestor;
 
+    @Autowired
     public VehiculoController(GestorParqueadero gestor) {
         this.gestor = gestor;
     }
 
-    /*@PostMapping
-    public Vehiculo registrarVehiculo(@RequestBody Vehiculo vehiculo) {
-        System.out.println("Esto es una prueba");
-        return gestor.registrarEntrada(vehiculo);
-    }*/
-
-    @PutMapping("/salida/{placa}")
-    public double registrarSalida(@PathVariable String placa) {
-        System.out.println("Actualizando el vehiculo de placa: "+ placa);
-        return gestor.registrarSalida(placa);
-    }
-
-    /*@GetMapping("/entrada/{placa}")
-    public String mostrar(@PathVariable String placa) {
-        System.out.println("Actualizando el vehiculo de placa: "+ placa);
-        return placa;
-    }*/
-    @GetMapping("/entrada/{placa}")
-    public Map<String, String> mostrar(@PathVariable String placa) {
-        System.out.println("Mostrando el vehículo con placa: " + placa);
+    @PostMapping("/entrada")
+    public Map<String, String> registrarVehiculo(@RequestBody Vehiculo vehiculo) {
+        String mensaje = gestor.registrarEntrada(vehiculo);
 
         Map<String, String> response = new HashMap<>();
-        response.put("placa", placa);
-        response.put("mensaje", "Vehículo encontrado");
-        response.put("fechaEntrada", "2021-10-10 10:00:00");
+        response.put("placa", vehiculo.getPlaca());
+        response.put("mensaje", mensaje);
 
         return response;
     }
 
-    @PostMapping("/entrada")
-    public Map<String, Object> registrarVehiculo(@RequestBody Vehiculo vehiculo) {
-        System.out.println("Registrando el vehículo con placa: " + vehiculo.getPlaca());
+    @PutMapping("/salida/{placa}")
+    public Map<String, Object> registrarSalida(@PathVariable String placa, @RequestParam boolean cobrarPorMinuto) {
+        String mensaje = gestor.registrarSalida(placa, cobrarPorMinuto);
 
-        Vehiculo vehiculoRegistrado = gestor.registrarEntrada(vehiculo);
-
-        // Verificar si el vehículo fue registrado correctamente o no había espacios disponibles
-        if (vehiculoRegistrado == null) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("mensaje", "No hay espacios disponibles en el parqueadero.");
-            return response;
-        }
-
-        // Preparar la respuesta de éxito
         Map<String, Object> response = new HashMap<>();
-        response.put("placa", vehiculoRegistrado.getPlaca());
-        response.put("mensaje", "Vehículo registrado exitosamente");
-        response.put("fechaEntrada", vehiculoRegistrado.getHoraIngreso());
+        response.put("placa", placa);
+        response.put("mensaje", mensaje);
 
         return response;
     }
 
+    @GetMapping("/detalles/{placa}")
+    public Map<String, Object> obtenerDetallesVehiculo(@PathVariable String placa, @RequestParam boolean cobrarPorMinuto) {
+        return gestor.obtenerDetallesVehiculo(placa, cobrarPorMinuto);
+    }
 
-
-
-
+//    @GetMapping("/entrada/{placa}")
+//    public Map<String, String> mostrar(@PathVariable String placa) {
+//        // Aquí puedes agregar lógica para mostrar detalles adicionales si es necesario
+//        Map<String, String> response = new HashMap<>();
+//        response.put("placa", placa);
+//        response.put("mensaje", "Detalles del vehículo");
+//
+//        return response;
+//    }
 }
-

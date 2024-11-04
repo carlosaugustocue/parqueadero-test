@@ -73,63 +73,96 @@ El **Sistema de Parqueadero** es una aplicación web que permite gestionar el in
 
    La aplicación estará corriendo en `http://localhost:8080`.
 
-## Endpoints de la API
 
-### 1. Registrar la entrada de un vehículo (POST)
-- **Endpoint**: `/api/vehiculos`
+# API de Parqueadero - Documentación de Endpoints
+
+Esta documentación describe los endpoints disponibles en la API de parqueadero. Los endpoints permiten registrar la entrada y salida de vehículos, y consultar los detalles de los mismos.
+
+## Endpoints
+
+### 1. Registrar la entrada de un vehículo
 - **Método**: `POST`
-- **Body** (JSON):
-
+- **URL**: `/api/vehiculos/entrada`
+- **Descripción**: Registra la entrada de un vehículo al parqueadero. Verifica si el vehículo ya está presente y si hay espacio disponible.
+- **Cuerpo de la solicitud (JSON)**:
   ```json
   {
     "placa": "ABC123",
-    "tipoVehiculo": "carro"
+    "tipoVehiculo": "Carro"
+  }
+  ```
+- **Respuesta (JSON)**:
+  ```json
+  {
+    "placa": "ABC123",
+    "mensaje": "Vehículo registrado con éxito."
   }
   ```
 
-- **Descripción**: Este endpoint registra un nuevo vehículo en el parqueadero y asigna un espacio si está disponible.
-
-### 2. Registrar la salida de un vehículo (PUT)
-- **Endpoint**: `/api/vehiculos/salida/{placa}`
+### 2. Registrar la salida de un vehículo
 - **Método**: `PUT`
-- **Descripción**: Registra la salida de un vehículo y calcula el costo según el tiempo de estancia.
+- **URL**: `/api/vehiculos/salida/{placa}`
+- **Descripción**: Registra la salida de un vehículo, calcula el costo de la estancia y elimina el vehículo del parqueadero.
+- **Parámetro de consulta**:
+    - `cobrarPorMinuto` (booleano): Indica si el cálculo se realiza por minuto (`true`) o por hora (`false`).
+- **Ejemplo de URL**:
+  ```http
+  /api/vehiculos/salida/ABC123?cobrarPorMinuto=false
+  ```
+- **Respuesta (JSON)**:
+  ```json
+  {
+    "placa": "ABC123",
+    "mensaje": "Vehículo retirado. Costo total: $15,000.00 COP"
+  }
+  ```
 
-### 3. Obtener todas las tarifas (GET)
-- **Endpoint**: `/tarifas`
+### 3. Obtener detalles de un vehículo
 - **Método**: `GET`
-- **Descripción**: Devuelve una lista de todas las tarifas registradas.
+- **URL**: `/api/vehiculos/detalles/{placa}`
+- **Descripción**: Devuelve detalles de un vehículo en el parqueadero, incluyendo la hora de ingreso y el valor facturado hasta el momento.
+- **Parámetro de consulta**:
+    - `cobrarPorMinuto` (booleano): Especifica si el cálculo del valor facturado se debe hacer por minuto (`true`) o por hora (`false`).
+- **Ejemplo de URL**:
+  ```http
+  /api/vehiculos/detalles/ABC123?cobrarPorMinuto=true
+  ```
+- **Respuesta (JSON)**:
+  ```json
+  {
+    "placa": "ABC123",
+    "horaIngreso": "2024-11-04T14:00:00",
+    "valorFacturado": "$12,000.00 COP"
+  }
+  ```
 
-## Ejemplo de Pruebas
+## Notas para el equipo de frontend
+- **Formato de fechas**: La hora de ingreso se devuelve en formato ISO 8601 (`yyyy-MM-dd'T'HH:mm:ss`).
+- **Valores facturados**: Los valores están formateados en pesos colombianos (COP) con comas y puntos decimales para facilitar la visualización.
+- **Parámetro `cobrarPorMinuto`**: Permite al frontend especificar cómo calcular el valor de la estancia, ofreciendo flexibilidad según el contexto de uso.
 
-### 1. Probar con Postman:
+## Ejemplos de Peticiones con `curl`
 
-- **Registrar vehículo**:
-    - Método: `POST`
-    - URL: `http://localhost:8080/api/vehiculos`
-    - Body:
-      ```json
-      {
-        "placa": "XYZ789",
-        "tipoVehiculo": "moto"
-      }
-      ```
-
-- **Registrar salida de vehículo**:
-    - Método: `PUT`
-    - URL: `http://localhost:8080/api/vehiculos/salida/XYZ789`
-
-### 2. Verificar las tarifas:
-
-- Método: `GET`
-- URL: `http://localhost:8080/tarifas`
-
-## Ejecución de Pruebas
-
-Puedes ejecutar las pruebas del proyecto con Maven usando el siguiente comando:
-
+### 1. Registrar la entrada de un vehículo
 ```bash
-mvn test
+curl -X POST http://localhost:8080/api/vehiculos/entrada \
+-H "Content-Type: application/json" \
+-d '{"placa": "ABC123", "tipoVehiculo": "Carro"}'
 ```
+
+### 2. Registrar la salida de un vehículo
+```bash
+curl -X PUT "http://localhost:8080/api/vehiculos/salida/ABC123?cobrarPorMinuto=false"
+```
+
+### 3. Obtener detalles de un vehículo
+```bash
+curl -X GET "http://localhost:8080/api/vehiculos/detalles/ABC123?cobrarPorMinuto=true"
+```
+
+## Contacto
+Para preguntas o más información, contacta al equipo de desarrollo backend.
+
 
 ## Licencia
 Este proyecto está licenciado bajo la [MIT License](LICENSE).

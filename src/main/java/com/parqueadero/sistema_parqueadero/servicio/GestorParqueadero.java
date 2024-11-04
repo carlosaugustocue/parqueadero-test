@@ -1,11 +1,19 @@
 package com.parqueadero.sistema_parqueadero.servicio;
 
-import com.parqueadero.sistema_parqueadero.modelo.*;
-import com.parqueadero.sistema_parqueadero.repositorio.*;
+import com.parqueadero.sistema_parqueadero.modelo.HistorialVehiculo;
+import com.parqueadero.sistema_parqueadero.modelo.Vehiculo;
+import com.parqueadero.sistema_parqueadero.modelo.EspacioParqueadero;
+import com.parqueadero.sistema_parqueadero.repositorio.HistorialVehiculoRepository;
+import com.parqueadero.sistema_parqueadero.repositorio.VehiculoRepository;
+import com.parqueadero.sistema_parqueadero.repositorio.EspacioRepository;
+import com.parqueadero.sistema_parqueadero.repositorio.TarifaRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List; // <- Importamos List
+import java.util.HashMap;
+import java.util.List;
+    import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -13,60 +21,97 @@ public class GestorParqueadero {
 
     private final VehiculoRepository vehiculoRepo;
     private final EspacioRepository espacioRepo;
-    private final TarifaRepository tarifaRepo;  // Agregamos el repositorio de Tarifa
+    private final TarifaRepository tarifaRepo;
+    private final HistorialVehiculoRepository historialRepo;
+    private static final int LIMITE_CUPOS = 10; // Define el límite de cupos aquí
 
-    public GestorParqueadero(VehiculoRepository vehiculoRepo, EspacioRepository espacioRepo, TarifaRepository tarifaRepo) {
+    private static final double TARIFA_POR_HORA = 5000; // Tarifa en COP
+    private static final double TARIFA_POR_MINUTO = 100; // Tarifa en COP
+
+    public GestorParqueadero(VehiculoRepository vehiculoRepo, EspacioRepository espacioRepo, TarifaRepository tarifaRepo, HistorialVehiculoRepository historialRepo) {
         this.vehiculoRepo = vehiculoRepo;
         this.espacioRepo = espacioRepo;
         this.tarifaRepo = tarifaRepo;
+        this.historialRepo = historialRepo;
     }
 
-    public Vehiculo registrarEntrada(Vehiculo vehiculo) {
-        // Buscar un espacio libre
-        EspacioParqueadero espacioLibre = espacioRepo.findByOcupado(false).stream().findFirst().orElse(null);
+    // Lógica para registrar la entrada de un vehículo
+    public String registrarEntrada(Vehiculo vehiculo) {
+        // Verificar si el vehículo ya está en el parqueadero
+        Optional<Vehiculo> vehiculoExistente = vehiculoRepo.findByPlaca(vehiculo.getPlaca());
+        if (vehiculoExistente.isPresent()) {
+            return "El vehículo con placa " + vehiculo.getPlaca() + " ya está registrado en el parqueadero.";
+        }
 
-        if (espacioLibre != null) {
-            // Asignar el espacio y registrar la hora de ingreso
-            espacioLibre.asignarEspacio();
-            espacioRepo.save(espacioLibre);
-            vehiculo.setHoraIngreso(LocalDateTime.now());
 
-            // Guardar y devolver el vehículo registrado
-            return vehiculoRepo.save(vehiculo);
+        List<Vehiculo> vehiculosEstacionados = vehiculoRepo.findAll();
+        if (vehiculosEstacionados.size() >= LIMITE_CUPOS) {
+            return "No hay espacio disponible en el parqueadero.";
+        }
+        vehiculo.setHoraIngreso(LocalDateTime.now());
+        vehiculoRepo.save(vehiculo);
+        return "Vehículo registrado con éxito.";
+    }
+
+    // Lógica para registrar la salida y calcular el costo
+    public String registrarSalida(String placa, boolean cobrarPorMinuto) {
+        Optional<Vehiculo> vehiculoOpt = vehiculoRepo.findByPlaca(placa);
+        if (vehiculoOpt.isEmpty()) {
+            return "Vehículo no encontrado.";
+        }
+
+        Vehiculo vehiculo = vehiculoOpt.get();
+        vehiculo.setHoraSalida(LocalDateTime.now());
+        Duration duracion = Duration.between(vehiculo.getHoraIngreso(), vehiculo.getHoraSalida());
+
+        double costo;
+        if (cobrarPorMinuto) {
+            // Calcular costo por minuto
+            costo = duracion.toMinutes() * TARIFA_POR_MINUTO;
         } else {
-            System.out.println("No hay espacios libres en el parqueadero.");
-            return null;  // No hay espacios disponibles
+            // Calcular costo por hora completa
+            costo = (duracion.toHours() + 1) * TARIFA_POR_HORA; // Redondeo hacia arriba
         }
+
+        // Guardar registro en HistorialVehiculo
+        HistorialVehiculo historial = new HistorialVehiculo(
+                vehiculo.getPlaca(),
+                vehiculo.getHoraIngreso(),
+                vehiculo.getHoraSalida()
+        );
+        historialRepo.save(historial);
+
+        // Eliminar el vehículo actual del estacionamiento
+        vehiculoRepo.delete(vehiculo);
+
+        return String.format("Vehículo retirado. Costo total: $%,.2f COP", costo);
     }
 
-
-    public double registrarSalida(String placa) {
-        Optional<Vehiculo> optionalVehiculo = vehiculoRepo.findByPlaca(placa);
-        if (optionalVehiculo.isPresent()) {
-            Vehiculo vehiculo = optionalVehiculo.get();
-            vehiculo.setHoraSalida(LocalDateTime.now());
-
-            // Buscar la tarifa por tipo de vehículo
-            Optional<Tarifa> optionalTarifa = tarifaRepo.findByTipoVehiculo(vehiculo.getTipoVehiculo());
-            if (optionalTarifa.isPresent()) {
-                Tarifa tarifa = optionalTarifa.get();
-                double costo = vehiculo.calcularCosto(tarifa.getPrecioPorHora());
-                vehiculoRepo.save(vehiculo);
-                liberarEspacio(vehiculo);
-                return costo;
-            } else {
-                throw new RuntimeException("No se encontró una tarifa para el tipo de vehículo: " + vehiculo.getTipoVehiculo());
-            }
+    public Map<String, Object> obtenerDetallesVehiculo(String placa, boolean cobrarPorMinuto) {
+        Optional<Vehiculo> vehiculoOpt = vehiculoRepo.findByPlaca(placa);
+        if (vehiculoOpt.isEmpty()) {
+            Map<String, Object> respuesta = new HashMap<>();
+            respuesta.put("mensaje", "Vehículo no encontrado.");
+            return respuesta;
         }
-        return 0;
+
+        Vehiculo vehiculo = vehiculoOpt.get();
+        Duration duracion = Duration.between(vehiculo.getHoraIngreso(), LocalDateTime.now());
+
+        double costo;
+        if (cobrarPorMinuto) {
+            costo = duracion.toMinutes() * TARIFA_POR_MINUTO;
+        } else {
+            costo = (duracion.toHours() + 1) * TARIFA_POR_HORA; // Redondeo hacia arriba
+        }
+
+        Map<String, Object> detalles = new HashMap<>();
+        detalles.put("placa", vehiculo.getPlaca());
+        detalles.put("horaIngreso", vehiculo.getHoraIngreso());
+        detalles.put("valorFacturado", String.format("$%,.2f COP", costo));
+
+        return detalles;
     }
 
-    private void liberarEspacio(Vehiculo vehiculo) {
-        List<EspacioParqueadero> espacios = espacioRepo.findByOcupado(true);
-        EspacioParqueadero espacio = espacios.stream().findFirst().orElse(null);
-        if (espacio != null) {
-            espacio.liberarEspacio();
-            espacioRepo.save(espacio);
-        }
-    }
 }
+
