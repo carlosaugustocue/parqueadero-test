@@ -32,19 +32,22 @@ public class VehiculoController {
 
     @PutMapping("/salida/{placa}")
     public Map<String, Object> registrarSalida(@PathVariable String placa, @RequestParam boolean cobrarPorMinuto) {
-        String mensaje = gestor.registrarSalida(placa, cobrarPorMinuto);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("placa", placa);
-        response.put("mensaje", mensaje);
-
+        // Llamar al método del servicio que ya devuelve un Map con la respuesta JSON
+        Map<String, Object> response = gestor.registrarSalida(placa, cobrarPorMinuto);
         return response;
     }
+
 
     @GetMapping("/detalles/{placa}")
     public Map<String, Object> obtenerDetallesVehiculo(@PathVariable String placa, @RequestParam boolean cobrarPorMinuto) {
         return gestor.obtenerDetallesVehiculo(placa, cobrarPorMinuto);
     }
+
+    @GetMapping("/detalles/minutos/{placa}")
+    public Map<String, Object> obtenerDetallesVehiculoConMinutos(@PathVariable String placa) {
+        return gestor.obtenerDetallesVehiculoConMinutos(placa);
+    }
+
 
 //    @GetMapping("/entrada/{placa}")
 //    public Map<String, String> mostrar(@PathVariable String placa) {

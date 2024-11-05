@@ -73,6 +73,7 @@ El **Sistema de Parqueadero** es una aplicación web que permite gestionar el in
 
    La aplicación estará corriendo en `http://localhost:8080`.
 
+---
 
 # API de Parqueadero - Documentación de Endpoints
 
@@ -102,7 +103,7 @@ Esta documentación describe los endpoints disponibles en la API de parqueadero.
 ### 2. Registrar la salida de un vehículo
 - **Método**: `PUT`
 - **URL**: `/api/vehiculos/salida/{placa}`
-- **Descripción**: Registra la salida de un vehículo, calcula el costo de la estancia y elimina el vehículo del parqueadero.
+- **Descripción**: Registra la salida de un vehículo, calcula el costo de la estancia y elimina el vehículo del parqueadero. Devuelve detalles de la salida en formato JSON.
 - **Parámetro de consulta**:
     - `cobrarPorMinuto` (booleano): Indica si el cálculo se realiza por minuto (`true`) o por hora (`false`).
 - **Ejemplo de URL**:
@@ -113,7 +114,8 @@ Esta documentación describe los endpoints disponibles en la API de parqueadero.
   ```json
   {
     "placa": "ABC123",
-    "mensaje": "Vehículo retirado. Costo total: $15,000.00 COP"
+    "costoTotal": "$15,000.00 COP",
+    "mensaje": "Vehículo retirado con éxito."
   }
   ```
 
@@ -136,6 +138,24 @@ Esta documentación describe los endpoints disponibles en la API de parqueadero.
   }
   ```
 
+### 4. Obtener los minutos transcurridos desde la entrada de un vehículo
+- **Método**: `GET`
+- **URL**: `/api/vehiculos/detalles/minutos/{placa}`
+- **Descripción**: Devuelve detalles de un vehículo en el parqueadero, incluyendo la hora de ingreso y los minutos transcurridos desde su entrada.
+- **Ejemplo de URL**:
+  ```http
+  /api/vehiculos/detalles/minutos/ABC123
+  ```
+- **Respuesta (JSON)**:
+  ```json
+  {
+    "placa": "ABC123",
+    "horaIngreso": "2024-11-04T14:00:00",
+    "minutosTranscurridos": 150,
+    "mensaje": "Detalles obtenidos con éxito."
+  }
+  ```
+
 ## Notas para el equipo de frontend
 - **Formato de fechas**: La hora de ingreso se devuelve en formato ISO 8601 (`yyyy-MM-dd'T'HH:mm:ss`).
 - **Valores facturados**: Los valores están formateados en pesos colombianos (COP) con comas y puntos decimales para facilitar la visualización.
@@ -145,8 +165,8 @@ Esta documentación describe los endpoints disponibles en la API de parqueadero.
 
 ### 1. Registrar la entrada de un vehículo
 ```bash
-curl -X POST http://localhost:8080/api/vehiculos/entrada \
--H "Content-Type: application/json" \
+curl -X POST http://localhost:8080/api/vehiculos/entrada \\
+-H "Content-Type: application/json" \\
 -d '{"placa": "ABC123", "tipoVehiculo": "Carro"}'
 ```
 
@@ -160,9 +180,15 @@ curl -X PUT "http://localhost:8080/api/vehiculos/salida/ABC123?cobrarPorMinuto=f
 curl -X GET "http://localhost:8080/api/vehiculos/detalles/ABC123?cobrarPorMinuto=true"
 ```
 
+### 4. Obtener los minutos transcurridos desde la entrada de un vehículo
+```bash
+curl -X GET "http://localhost:8080/api/vehiculos/detalles/minutos/ABC123"
+```
+
 ## Contacto
 Para preguntas o más información, contacta al equipo de desarrollo backend.
 
+---
 
 ## Licencia
 Este proyecto está licenciado bajo la [MIT License](LICENSE).

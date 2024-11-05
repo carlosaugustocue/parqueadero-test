@@ -54,10 +54,13 @@ public class GestorParqueadero {
     }
 
     // Lógica para registrar la salida y calcular el costo
-    public String registrarSalida(String placa, boolean cobrarPorMinuto) {
+    public Map<String, Object> registrarSalida(String placa, boolean cobrarPorMinuto) {
         Optional<Vehiculo> vehiculoOpt = vehiculoRepo.findByPlaca(placa);
+        Map<String, Object> response = new HashMap<>();
+
         if (vehiculoOpt.isEmpty()) {
-            return "Vehículo no encontrado.";
+            response.put("mensaje", "Vehículo no encontrado.");
+            return response;
         }
 
         Vehiculo vehiculo = vehiculoOpt.get();
@@ -66,14 +69,12 @@ public class GestorParqueadero {
 
         double costo;
         if (cobrarPorMinuto) {
-            // Calcular costo por minuto
             costo = duracion.toMinutes() * TARIFA_POR_MINUTO;
         } else {
-            // Calcular costo por hora completa
             costo = (duracion.toHours() + 1) * TARIFA_POR_HORA; // Redondeo hacia arriba
         }
 
-        // Guardar registro en HistorialVehiculo
+        // Guardar el registro en el historial
         HistorialVehiculo historial = new HistorialVehiculo(
                 vehiculo.getPlaca(),
                 vehiculo.getHoraIngreso(),
@@ -81,11 +82,16 @@ public class GestorParqueadero {
         );
         historialRepo.save(historial);
 
-        // Eliminar el vehículo actual del estacionamiento
         vehiculoRepo.delete(vehiculo);
 
-        return String.format("Vehículo retirado. Costo total: $%,.2f COP", costo);
+        // Armar la respuesta JSON
+        response.put("placa", vehiculo.getPlaca());
+        response.put("costoTotal", String.format("$%,.2f COP", costo));
+        response.put("mensaje", "Vehículo retirado con éxito.");
+
+        return response;
     }
+
 
     public Map<String, Object> obtenerDetallesVehiculo(String placa, boolean cobrarPorMinuto) {
         Optional<Vehiculo> vehiculoOpt = vehiculoRepo.findByPlaca(placa);
@@ -112,6 +118,29 @@ public class GestorParqueadero {
 
         return detalles;
     }
+
+    public Map<String, Object> obtenerDetallesVehiculoConMinutos(String placa) {
+        Optional<Vehiculo> vehiculoOpt = vehiculoRepo.findByPlaca(placa);
+        Map<String, Object> response = new HashMap<>();
+
+        if (vehiculoOpt.isEmpty()) {
+            response.put("mensaje", "Vehículo no encontrado.");
+            return response;
+        }
+
+        Vehiculo vehiculo = vehiculoOpt.get();
+        LocalDateTime horaIngreso = vehiculo.getHoraIngreso();
+        Duration duracion = Duration.between(horaIngreso, LocalDateTime.now());
+        long minutosTranscurridos = duracion.toMinutes();
+
+        response.put("placa", vehiculo.getPlaca());
+        response.put("horaIngreso", horaIngreso);
+        response.put("minutosTranscurridos", minutosTranscurridos);
+        response.put("mensaje", "Detalles obtenidos con éxito.");
+
+        return response;
+    }
+
 
 }
 
