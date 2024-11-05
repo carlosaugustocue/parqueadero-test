@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
-    import java.util.Map;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -42,7 +42,6 @@ public class GestorParqueadero {
         if (vehiculoExistente.isPresent()) {
             return "El vehículo con placa " + vehiculo.getPlaca() + " ya está registrado en el parqueadero.";
         }
-
 
         List<Vehiculo> vehiculosEstacionados = vehiculoRepo.findAll();
         if (vehiculosEstacionados.size() >= LIMITE_CUPOS) {
@@ -92,7 +91,6 @@ public class GestorParqueadero {
         return response;
     }
 
-
     public Map<String, Object> obtenerDetallesVehiculo(String placa, boolean cobrarPorMinuto) {
         Optional<Vehiculo> vehiculoOpt = vehiculoRepo.findByPlaca(placa);
         if (vehiculoOpt.isEmpty()) {
@@ -141,6 +139,8 @@ public class GestorParqueadero {
         return response;
     }
 
-
+    // **Método para obtener todos los vehículos**
+    public List<Vehiculo> obtenerTodosLosVehiculos() {
+        return vehiculoRepo.findAll();
+    }
 }
-

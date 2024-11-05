@@ -1,4 +1,3 @@
-
 # Sistema de Parqueadero
 
 ## Descripción
@@ -10,6 +9,7 @@ El **Sistema de Parqueadero** es una aplicación web que permite gestionar el in
 - **Control del tiempo de estancia**: Calcula el tiempo que el vehículo ha permanecido en el parqueadero.
 - **Cálculo de tarifas**: Genera el costo por el tiempo de permanencia según las tarifas definidas para cada tipo de vehículo.
 - **Salida de vehículos**: Registra la salida del vehículo y libera el espacio de parqueo.
+- **Listado de vehículos**: Permite obtener una lista de todos los vehículos registrados en el parqueadero con toda su información.
 
 ## Tecnologías utilizadas
 - **Backend**: Java con Spring Boot
@@ -77,7 +77,7 @@ El **Sistema de Parqueadero** es una aplicación web que permite gestionar el in
 
 # API de Parqueadero - Documentación de Endpoints
 
-Esta documentación describe los endpoints disponibles en la API de parqueadero. Los endpoints permiten registrar la entrada y salida de vehículos, y consultar los detalles de los mismos.
+Esta documentación describe los endpoints disponibles en la API de parqueadero. Los endpoints permiten registrar la entrada y salida de vehículos, consultar detalles y obtener listados.
 
 ## Endpoints
 
@@ -156,8 +156,37 @@ Esta documentación describe los endpoints disponibles en la API de parqueadero.
   }
   ```
 
+### 5. Obtener la lista de todos los vehículos
+- **Método**: `GET`
+- **URL**: `/api/vehiculos`
+- **Descripción**: Devuelve una lista de todos los vehículos registrados en el parqueadero con toda su información.
+- **Ejemplo de URL**:
+  ```http
+  /api/vehiculos
+  ```
+- **Respuesta (JSON)**:
+  ```json
+  [
+    {
+      "id": 1,
+      "placa": "ABC123",
+      "tipoVehiculo": "Carro",
+      "horaIngreso": "2024-11-04T14:00:00",
+      "horaSalida": null
+    },
+    {
+      "id": 2,
+      "placa": "XYZ789",
+      "tipoVehiculo": "Moto",
+      "horaIngreso": "2024-11-04T15:30:00",
+      "horaSalida": null
+    }
+    // ... otros vehículos
+  ]
+  ```
+
 ## Notas para el equipo de frontend
-- **Formato de fechas**: La hora de ingreso se devuelve en formato ISO 8601 (`yyyy-MM-dd'T'HH:mm:ss`).
+- **Formato de fechas**: La hora de ingreso y salida se devuelven en formato ISO 8601 (`yyyy-MM-dd'T'HH:mm:ss`).
 - **Valores facturados**: Los valores están formateados en pesos colombianos (COP) con comas y puntos decimales para facilitar la visualización.
 - **Parámetro `cobrarPorMinuto`**: Permite al frontend especificar cómo calcular el valor de la estancia, ofreciendo flexibilidad según el contexto de uso.
 
@@ -165,8 +194,8 @@ Esta documentación describe los endpoints disponibles en la API de parqueadero.
 
 ### 1. Registrar la entrada de un vehículo
 ```bash
-curl -X POST http://localhost:8080/api/vehiculos/entrada \\
--H "Content-Type: application/json" \\
+curl -X POST http://localhost:8080/api/vehiculos/entrada \
+-H "Content-Type: application/json" \
 -d '{"placa": "ABC123", "tipoVehiculo": "Carro"}'
 ```
 
@@ -185,6 +214,11 @@ curl -X GET "http://localhost:8080/api/vehiculos/detalles/ABC123?cobrarPorMinuto
 curl -X GET "http://localhost:8080/api/vehiculos/detalles/minutos/ABC123"
 ```
 
+### 5. Obtener la lista de todos los vehículos
+```bash
+curl -X GET http://localhost:8080/api/vehiculos
+```
+
 ## Contacto
 Para preguntas o más información, contacta al equipo de desarrollo backend.
 
@@ -192,3 +226,5 @@ Para preguntas o más información, contacta al equipo de desarrollo backend.
 
 ## Licencia
 Este proyecto está licenciado bajo la [MIT License](LICENSE).
+
+---

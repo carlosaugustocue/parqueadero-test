@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -32,11 +33,9 @@ public class VehiculoController {
 
     @PutMapping("/salida/{placa}")
     public Map<String, Object> registrarSalida(@PathVariable String placa, @RequestParam boolean cobrarPorMinuto) {
-        // Llamar al método del servicio que ya devuelve un Map con la respuesta JSON
         Map<String, Object> response = gestor.registrarSalida(placa, cobrarPorMinuto);
         return response;
     }
-
 
     @GetMapping("/detalles/{placa}")
     public Map<String, Object> obtenerDetallesVehiculo(@PathVariable String placa, @RequestParam boolean cobrarPorMinuto) {
@@ -48,14 +47,9 @@ public class VehiculoController {
         return gestor.obtenerDetallesVehiculoConMinutos(placa);
     }
 
-
-//    @GetMapping("/entrada/{placa}")
-//    public Map<String, String> mostrar(@PathVariable String placa) {
-//        // Aquí puedes agregar lógica para mostrar detalles adicionales si es necesario
-//        Map<String, String> response = new HashMap<>();
-//        response.put("placa", placa);
-//        response.put("mensaje", "Detalles del vehículo");
-//
-//        return response;
-//    }
+    // **Endpoint para obtener todos los vehículos**
+    @GetMapping
+    public List<Vehiculo> obtenerTodosLosVehiculos() {
+        return gestor.obtenerTodosLosVehiculos();
+    }
 }
