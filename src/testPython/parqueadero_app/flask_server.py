@@ -13,18 +13,25 @@ def capturar_placa():
         frame = capturar_imagen()
         placa = detectar_placa(frame)
 
-        # Filtrar solo letras y números en la placa detectada
-        placa_limpia = re.sub(r'[^A-Za-z0-9]', '', placa)
+        if placa:
+            # Filtrar solo letras y números en la placa detectada y solo mayusculas
+            placa_limpia = re.sub(r'[^A-Z0-9]', '', placa.upper())
 
-        # Verificar si hay espacio en el parqueadero
-        respuesta = enviar_placa_al_servidor(placa_limpia)
 
-        return jsonify({
-            'placa': placa_limpia,
-            'mensaje': 'Placa detectada y enviada al servidor',
-            'respuesta_servidor': respuesta
-        }), 200
+            # Enviar la placa al servidor
+            # Mostrar por consola la placa
+            print(f"Placa detectada: {placa}")
+            respuesta = enviar_placa_al_servidor(placa_limpia)
+
+            return jsonify({
+                'placa': placa_limpia,
+                'mensaje': 'Placa detectada y enviada al servidor',
+                'respuesta_servidor': respuesta
+            }), 200
+        else:
+            return jsonify({'error': 'No se pudo detectar la placa'}), 500
     except Exception as e:
+        print(f"Error al procesar la solicitud: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

@@ -6,8 +6,7 @@ def enviar_placa_al_servidor(placa):
     url = f"{SERVER_URL}/api/vehiculos/entrada"
     data = {
         "placa": placa,
-        "tipoVehiculo": "Automóvil",
-        "horaIngreso": datetime.now().isoformat()  # Formato ISO para LocalDateTime
+        "tipoVehiculo": "Carro"
     }
     response = requests.post(url, json=data)
     if response.status_code == 200:
