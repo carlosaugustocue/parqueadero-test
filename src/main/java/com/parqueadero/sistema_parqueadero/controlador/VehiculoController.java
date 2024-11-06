@@ -11,6 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/vehiculos")
+@CrossOrigin(origins = "http://localhost:8081") // Reemplaza con la URL de tu frontend
 public class VehiculoController {
 
     private final GestorParqueadero gestor;
