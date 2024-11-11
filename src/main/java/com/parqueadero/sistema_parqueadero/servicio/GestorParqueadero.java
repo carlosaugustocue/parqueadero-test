@@ -139,7 +139,7 @@ public class GestorParqueadero {
         return response;
     }
 
-    // **Método para obtener todos los vehículos**
+//     Método para obtener todos los vehículos
     public List<Vehiculo> obtenerTodosLosVehiculos() {
         return vehiculoRepo.findAll();
     }
