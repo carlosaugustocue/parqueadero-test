@@ -11,15 +11,17 @@ public class Tarifa {
 
     private String tipoVehiculo;
     private double precioPorHora;
+    private double precioPorMinuto;
 
     // Constructor por defecto
     public Tarifa() {
     }
 
     // Constructor con parámetros
-    public Tarifa(String tipoVehiculo, double precioPorHora) {
+    public Tarifa(String tipoVehiculo, double precioPorHora, double precioPorMinuto) {
         this.tipoVehiculo = tipoVehiculo;
         this.precioPorHora = precioPorHora;
+        this.precioPorMinuto = precioPorMinuto;
     }
 
     // Getters y Setters
@@ -46,5 +48,12 @@ public class Tarifa {
     public void setPrecioPorHora(double precioPorHora) {
         this.precioPorHora = precioPorHora;
     }
-}
 
+    public double getPrecioPorMinuto() {
+        return precioPorMinuto;
+    }
+
+    public void setPrecioPorMinuto(double precioPorMinuto) {
+        this.precioPorMinuto = precioPorMinuto;
+    }
+}

@@ -1,6 +1,7 @@
 package com.parqueadero.sistema_parqueadero.servicio;
 
 import com.parqueadero.sistema_parqueadero.modelo.HistorialVehiculo;
+import com.parqueadero.sistema_parqueadero.modelo.Tarifa;
 import com.parqueadero.sistema_parqueadero.modelo.Vehiculo;
 import com.parqueadero.sistema_parqueadero.modelo.EspacioParqueadero;
 import com.parqueadero.sistema_parqueadero.repositorio.HistorialVehiculoRepository;
@@ -25,10 +26,8 @@ public class GestorParqueadero {
     private final HistorialVehiculoRepository historialRepo;
     private static final int LIMITE_CUPOS = 10; // Define el límite de cupos aquí
 
-    private static final double TARIFA_POR_HORA = 5000; // Tarifa en COP
-    private static final double TARIFA_POR_MINUTO = 100; // Tarifa en COP
-
-    public GestorParqueadero(VehiculoRepository vehiculoRepo, EspacioRepository espacioRepo, TarifaRepository tarifaRepo, HistorialVehiculoRepository historialRepo) {
+    public GestorParqueadero(VehiculoRepository vehiculoRepo, EspacioRepository espacioRepo,
+                             TarifaRepository tarifaRepo, HistorialVehiculoRepository historialRepo) {
         this.vehiculoRepo = vehiculoRepo;
         this.espacioRepo = espacioRepo;
         this.tarifaRepo = tarifaRepo;
@@ -66,11 +65,19 @@ public class GestorParqueadero {
         vehiculo.setHoraSalida(LocalDateTime.now());
         Duration duracion = Duration.between(vehiculo.getHoraIngreso(), vehiculo.getHoraSalida());
 
+        // Obtener la tarifa según el tipo de vehículo
+        Optional<Tarifa> tarifaOpt = tarifaRepo.findByTipoVehiculo(vehiculo.getTipoVehiculo());
+        if (tarifaOpt.isEmpty()) {
+            response.put("mensaje", "No se encontró una tarifa para el tipo de vehículo: " + vehiculo.getTipoVehiculo());
+            return response;
+        }
+
+        Tarifa tarifa = tarifaOpt.get();
         double costo;
         if (cobrarPorMinuto) {
-            costo = duracion.toMinutes() * TARIFA_POR_MINUTO;
+            costo = duracion.toMinutes() * tarifa.getPrecioPorMinuto();
         } else {
-            costo = (duracion.toHours() + 1) * TARIFA_POR_HORA; // Redondeo hacia arriba
+            costo = (duracion.toHours() + 1) * tarifa.getPrecioPorHora(); // Redondeo hacia arriba
         }
 
         // Guardar el registro en el historial
@@ -91,30 +98,45 @@ public class GestorParqueadero {
         return response;
     }
 
+    // Obtener detalles del vehículo con cálculo del costo
     public Map<String, Object> obtenerDetallesVehiculo(String placa, boolean cobrarPorMinuto) {
         Optional<Vehiculo> vehiculoOpt = vehiculoRepo.findByPlaca(placa);
+        Map<String, Object> response = new HashMap<>();
+
         if (vehiculoOpt.isEmpty()) {
-            Map<String, Object> respuesta = new HashMap<>();
-            respuesta.put("mensaje", "Vehículo no encontrado.");
-            return respuesta;
+            response.put("mensaje", "Vehículo no encontrado.");
+            return response;
         }
 
         Vehiculo vehiculo = vehiculoOpt.get();
         Duration duracion = Duration.between(vehiculo.getHoraIngreso(), LocalDateTime.now());
 
-        double costo;
-        if (cobrarPorMinuto) {
-            costo = duracion.toMinutes() * TARIFA_POR_MINUTO;
-        } else {
-            costo = (duracion.toHours() + 1) * TARIFA_POR_HORA; // Redondeo hacia arriba
+        // Obtener la tarifa según el tipo de vehículo
+        Optional<Tarifa> tarifaOpt = tarifaRepo.findByTipoVehiculo(vehiculo.getTipoVehiculo());
+        if (tarifaOpt.isEmpty()) {
+            response.put("mensaje", "No se encontró una tarifa para el tipo de vehículo: " + vehiculo.getTipoVehiculo());
+            return response;
         }
 
-        Map<String, Object> detalles = new HashMap<>();
-        detalles.put("placa", vehiculo.getPlaca());
-        detalles.put("horaIngreso", vehiculo.getHoraIngreso());
-        detalles.put("valorFacturado", String.format("$%,.2f COP", costo));
+        Tarifa tarifa = tarifaOpt.get();
+        double costo;
+        if (cobrarPorMinuto) {
+            costo = duracion.toMinutes() * tarifa.getPrecioPorMinuto();
+        } else {
+            costo = (duracion.toHours() + 1) * tarifa.getPrecioPorHora(); // Redondeo hacia arriba
+        }
 
-        return detalles;
+        response.put("placa", vehiculo.getPlaca());
+        response.put("horaIngreso", vehiculo.getHoraIngreso());
+        response.put("valorFacturado", String.format("$%,.2f COP", costo));
+        response.put("mensaje", "Detalles obtenidos con éxito.");
+
+        return response;
+    }
+
+    // Método para obtener todos los vehículos
+    public List<Vehiculo> obtenerTodosLosVehiculos() {
+        return vehiculoRepo.findAll();
     }
 
     public Map<String, Object> obtenerDetallesVehiculoConMinutos(String placa) {
@@ -139,8 +161,4 @@ public class GestorParqueadero {
         return response;
     }
 
-//     Método para obtener todos los vehículos
-    public List<Vehiculo> obtenerTodosLosVehiculos() {
-        return vehiculoRepo.findAll();
-    }
 }
