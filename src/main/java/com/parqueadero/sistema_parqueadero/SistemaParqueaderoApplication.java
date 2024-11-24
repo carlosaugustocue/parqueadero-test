@@ -26,10 +26,11 @@ public class SistemaParqueaderoApplication {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/api/**")
-						.allowedOrigins("http://localhost:8081", "http://192.168.1.70:8081") // Dominios permitidos
-						.allowedOrigins("http://localhost:3000")  // Permite el frontend desde este dominio
-						.allowedMethods("GET", "POST", "PUT", "DELETE")  // Métodos permitidos
-						.allowedHeaders("*");  // Permite todos los headers
+						.allowedOrigins("http://localhost:8080", "http://localhost:8081",
+								"http://192.168.1.70:8081","http://192.168.1.77:8081", "http://localhost:3000")
+						.allowedMethods("GET", "POST", "PUT", "DELETE")
+						.allowedHeaders("*");
+
 			}
 		};
 	}
