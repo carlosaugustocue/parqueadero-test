@@ -29,6 +29,7 @@ public class MapService {
             conn.setRequestMethod("GET");
 
             // Leer la respuesta
+            //Esto es una prueba
             BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuilder resultado = new StringBuilder();
             String linea;
