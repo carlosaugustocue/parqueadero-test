@@ -53,3 +53,5 @@ src/testPython/parqueadero_app/src/__pycache__/captura.cpython-312.pyc
 src/testPython/parqueadero_app/src/__pycache__/api_client.cpython-312.pyc
 src/testPython/parqueadero_app/src/__pycache__/__init__.cpython-312.pyc
 src/testPython/parqueadero_app/__pycache__/.gitignore
+
+src/main/resources/application.properties
