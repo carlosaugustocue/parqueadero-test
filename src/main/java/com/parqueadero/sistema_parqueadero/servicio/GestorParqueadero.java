@@ -84,7 +84,8 @@ public class GestorParqueadero {
         HistorialVehiculo historial = new HistorialVehiculo(
                 vehiculo.getPlaca(),
                 vehiculo.getHoraIngreso(),
-                vehiculo.getHoraSalida()
+                vehiculo.getHoraSalida(),
+                vehiculo.getTipoVehiculo()
         );
         historialRepo.save(historial);
 
