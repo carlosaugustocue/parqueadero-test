@@ -19,4 +19,10 @@ public interface HistorialVehiculoRepository extends JpaRepository<HistorialVehi
 
     @Query("SELECT DATE(h.horaIngreso) as dia, COUNT(h) as cantidad FROM HistorialVehiculo h GROUP BY DATE(h.horaIngreso) ORDER BY cantidad DESC")
     List<Object[]> findDiasMasConcurridos();
+
+    @Query("SELECT h FROM HistorialVehiculo h ORDER BY h.horaIngreso DESC")
+    List<HistorialVehiculo> findLatestVehicles(); // Retorna todos, se puede limitar en el controlador.
+
+    @Query("SELECT h FROM HistorialVehiculo h ORDER BY h.horaIngreso DESC")
+    List<HistorialVehiculo> findLatestVehiclesLimited(org.springframework.data.domain.Pageable pageable);
 }

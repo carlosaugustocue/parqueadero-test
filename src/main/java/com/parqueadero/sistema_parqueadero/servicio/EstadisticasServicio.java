@@ -1,10 +1,13 @@
 package com.parqueadero.sistema_parqueadero.servicio;
 
 import com.parqueadero.sistema_parqueadero.dto.EstadisticasDTO;
+import com.parqueadero.sistema_parqueadero.modelo.HistorialVehiculo;
 import com.parqueadero.sistema_parqueadero.repositorio.HistorialVehiculoRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -14,6 +17,10 @@ public class EstadisticasServicio {
 
     public EstadisticasServicio(HistorialVehiculoRepository historialVehiculoRepository) {
         this.historialVehiculoRepository = historialVehiculoRepository;
+    }
+
+    public List<HistorialVehiculo> obtenerUltimosVehiculos(int limite) {
+        return historialVehiculoRepository.findLatestVehiclesLimited(PageRequest.of(0, limite));
     }
 
     public EstadisticasDTO obtenerEstadisticas() {
